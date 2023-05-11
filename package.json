@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "sst bind next dev",
     "build": "next build",
-    "test": "jest",
+    "test": "jest --watch --config ./jest.config.ts",
     "start": "next start",
     "lint": "next lint"
   },
