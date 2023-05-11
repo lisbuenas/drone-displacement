@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 
+// extension to allow multiple size
 const Board = ({ columns = 8, rows = 8 }:any) => {
     const gridTemplateColumns = `repeat(${columns}, 1fr)`;
     const gridTemplateRows = `repeat(${rows}, 1fr)`;

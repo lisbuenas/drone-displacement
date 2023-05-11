@@ -1,9 +1,0 @@
-FROM node:14-alpine
-
-WORKDIR /app
-
-COPY init.js .
-
-RUN npm install aws-sdk
-
-CMD ["node", "init.js"]

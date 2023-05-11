@@ -8,8 +8,10 @@
 # testing
 /coverage
 
+/.sst/
 # next.js
 /.next/
+/.open-next/
 /out/
 
 # production
