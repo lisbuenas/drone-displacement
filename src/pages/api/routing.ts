@@ -1,45 +1,48 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, ScanCommand, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  ScanCommand,
+  QueryCommand,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { nanoid } from "nanoid";
 import { Table } from "sst/node/table";
 
-export default async function handler(req:any, res:any) {
-    const db = DynamoDBDocumentClient.from(new DynamoDBClient({}));
+export default async function handler(req: any, res: any) {
+  const db = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
-  if(req.method === "GET"){
+  if (req.method === "GET") {
     let results;
-    
+
     const params = {
-        TableName: Table.routes.tableName,
-        ScanIndexForward: false,
-        Limit: 15,
-      };
-      
-      const scanCommand = new ScanCommand(params);
-      results = await db.send(scanCommand);
-      console.log("results", results?.Items)
+      TableName: Table.routes.tableName,
+      ScanIndexForward: false,
+      Limit: 15,
+    };
+
+    const scanCommand = new ScanCommand(params);
+    results = await db.send(scanCommand);
+    console.log("results", results?.Items);
 
     res.status(200).json({ routes: results?.Items });
     return;
-    
-  }else if(req.method === "POST"){
-    const text= (Math.random() *100).toString();
+  } else if (req.method === "POST") {
+    const text = (Math.random() * 100).toString();
     const unixTimestamp = Math.floor(new Date().getTime() / 1000);
     const payload = {
-            id: nanoid(),
-            routes:text,
-            createdAt: unixTimestamp
-          }
-    
-      await db.send(
-        new PutCommand({
-          TableName: Table.routes.tableName,
-          Item:payload,
-        })
-      );
- 
+      id: nanoid(),
+      routes: text,
+      createdAt: unixTimestamp,
+    };
+
+    await db.send(
+      new PutCommand({
+        TableName: Table.routes.tableName,
+        Item: payload,
+      })
+    );
+
     res.status(200).json({ routes: payload });
     return;
-    
   }
 }
