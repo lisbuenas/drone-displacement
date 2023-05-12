@@ -1,8 +1,8 @@
+import { findRoute } from "@/utils/findRoute";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   ScanCommand,
-  QueryCommand,
   PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { nanoid } from "nanoid";
@@ -17,7 +17,7 @@ export default async function handler(req: any, res: any) {
     const params = {
       TableName: Table.routes.tableName,
       ScanIndexForward: false,
-      Limit: 15,
+      Limit: 10,
     };
 
     const scanCommand = new ScanCommand(params);
@@ -27,11 +27,17 @@ export default async function handler(req: any, res: any) {
     res.status(200).json({ routes: results?.Items });
     return;
   } else if (req.method === "POST") {
+
+    const {startingPoint, pickupPoint, deliveryPoint} = req.body;
+    console.log("Req", req.body)
+
+    const route = findRoute(startingPoint, pickupPoint, deliveryPoint);
+
     const text = (Math.random() * 100).toString();
     const unixTimestamp = Math.floor(new Date().getTime() / 1000);
     const payload = {
       id: nanoid(),
-      routes: text,
+      routes: JSON.stringify(route),
       createdAt: unixTimestamp,
     };
 

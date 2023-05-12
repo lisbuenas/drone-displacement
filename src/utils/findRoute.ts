@@ -20,7 +20,6 @@ export function findRoute(
     return []
   }
 
-  console.log({startingPosition})
   const pickupPosition = getNodePosition(pickupNode, nodes);
   const deliveryPosition = getNodePosition(deliveryNode, nodes);
 

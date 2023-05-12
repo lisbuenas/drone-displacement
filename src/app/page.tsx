@@ -6,10 +6,14 @@ import Chessboard from './components/ChessBoard';
 
 export default function Home() {
 
-  const [lastRoutes, setLastRoutes] = useState<any>([])
+  const [lastRoutes, setLastRoutes] = useState<any>([]);
 
-  const calculateRoute = async () =>{
-    const {data} = await axios.post("/api/routing");
+  const [startingPoint, setStartingPoint] = useState("");
+  const [pickupPoint, setPickupPoint] = useState("");
+  const [deliveryPoint, setDeliveryPoint] = useState("");
+
+  const calculateRoute = async (startingPoint:string, pickupPoint:string, deliveryPoint:string) =>{
+    const {data} = await axios.post("/api/routing",{startingPoint, pickupPoint, deliveryPoint});
     console.log({data})
   }
 
@@ -44,6 +48,8 @@ export default function Home() {
           type="text"
           id="start-input"
           name="start-input"
+          value={startingPoint}
+          onChange={(e:any)=> setStartingPoint(e.target.value)}
           className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-96 focus:outline-none focus:border-blue-400"
         />
         <label htmlFor="pickup-input" className="text-xl">
@@ -53,6 +59,8 @@ export default function Home() {
           type="text"
           id="pickup-input"
           name="pickup-input"
+          value={pickupPoint}
+          onChange={(e:any)=> setPickupPoint(e.target.value)}
           className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-96 focus:outline-none focus:border-blue-400"
         />
         <label htmlFor="delivery-input" className="text-xl">
@@ -62,11 +70,14 @@ export default function Home() {
           type="text"
           id="delivery-input"
           name="delivery-input"
+          value={deliveryPoint}
+          onChange={(e:any) => setDeliveryPoint(e.target.value)}
           className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-96 focus:outline-none focus:border-blue-400"
         />
         <button
           onClick={async () => {
-            await calculateRoute();
+
+            await calculateRoute(startingPoint, pickupPoint, deliveryPoint);
             getRoutes()
           }}
           className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
@@ -75,7 +86,7 @@ export default function Home() {
         </button>
         <div className="text-white">
           <h2>Last Deliveries</h2>
-            {lastRoutes && lastRoutes?.map((el:any, index:number) =><div className='text-white' key={index}>Rota {el.routes}</div>)}
+            {lastRoutes && lastRoutes?.map((el:any, index:number) =><div className='text-white' key={index}>Rota {el.routes} {new Date(el.createdAt).toLocaleTimeString("pt-BR")}</div>)}
           </div>
       </div>
     </div>
