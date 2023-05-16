@@ -1,219 +1,143 @@
-type Nodes = Record<string, { edges: Record<string, number> }>;
-type Point = { x: number; y: number };
+type Vertex = { row: number; col: number };
+type Edge = { to: Vertex; weight: number };
 
-type NodeRoute = {
-  position: Point;
-  gScore: number;
-  fScore: number;
-  cameFrom?: NodeRoute;
-};
 
-export function findRoute(
-  startingNode: string,
-  pickupNode: string,
-  deliveryNode: string
-): string[] {
-  const nodes = createChessboardNodes();
-  const startingPosition = getNodePosition(startingNode, nodes);
-  
-  if(Number.isNaN(startingPosition.x) || Number.isNaN(startingPosition.y)){
-    return []
+type Graph = Array<Array<Array<Edge>>>;
+
+function convertPosition(position: string): Vertex | null {
+  const columnLabels = "ABCDEFGH";
+  const [columnChar, rowChar] = position.toUpperCase().split("");
+
+  const row = parseInt(rowChar, 10) - 1;
+  const col = columnLabels.indexOf(columnChar);
+
+  if (row >= 0 && row < 8 && col >= 0 && col < 8) {
+    return { row, col };
   }
 
-  const pickupPosition = getNodePosition(pickupNode, nodes);
-  const deliveryPosition = getNodePosition(deliveryNode, nodes);
-
-  const startNode: NodeRoute = {
-    position: startingPosition,
-    gScore: 0,
-    fScore: manhattanDistance(startingPosition, pickupPosition),
-  };
-
-  const goalNode: NodeRoute = {
-    position: pickupPosition,
-    gScore: 0,
-    fScore: manhattanDistance(pickupPosition, deliveryPosition),
-  };
-
-  const openSet: NodeRoute[] = [startNode];
-  const closedSet: NodeRoute[] = [];
-
-  while (openSet.length > 0) {
-    const current = getLowestFScoreNode(openSet);
-
-    if (
-      current.position.x === goalNode.position.x &&
-      current.position.y === goalNode.position.y
-    ) {
-      return reconstructPath(current);
-    }
-
-    openSet.splice(openSet.indexOf(current), 1);
-    closedSet.push(current);
-
-    for (const neighbor of getNeighbors(current, nodes)) {
-      if (
-        closedSet.some(
-          (n) =>
-            n.position.x === neighbor.position.x &&
-            n.position.y === neighbor.position.y
-        )
-      ) {
-        continue;
-      }
-
-      const tentativeGScore =
-        current.gScore + neighborDistance(current, neighbor);
-      const neighborIndex = openSet.findIndex(
-        (n) =>
-          n.position.x === neighbor.position.x &&
-          n.position.y === neighbor.position.y
-      );
-
-      if (neighborIndex === -1) {
-        openSet.push(neighbor);
-      } else if (tentativeGScore >= openSet[neighborIndex].gScore) {
-        continue;
-      }
-
-      neighbor.gScore = tentativeGScore;
-      neighbor.fScore =
-        neighbor.gScore +
-        manhattanDistance(neighbor.position, goalNode.position);
-      neighbor.cameFrom = current;
-    }
-  }
-
-  return [];
+  return null;
 }
 
-function createChessboardNodes(): Nodes {
-  const nodes: Nodes = {};
+function revertPosition(position: Vertex): string | null {
+  const columnLabels = "ABCDEFGH";
 
-  for (let column = 1; column <= 8; column++) {
-    for (let row = 1; row <= 8; row++) {
-      const nodeName = String.fromCharCode(column + 64) + row;
-      nodes[nodeName] = { edges: {} };
+  if (position.row >= 0 && position.row < 8 && position.col >= 0 && position.col < 8) {
+    const columnChar = columnLabels[position.col];
+    const rowChar = (position.row + 1).toString();
+    return `${columnChar}${rowChar}`;
+  }
 
-      if (column > 1 && row > 2) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column - 1 + 64) + (row - 2)
-        ] = 1;
-      }
-      if (column > 2 && row > 1) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column - 2 + 64) + (row - 1)
-        ] = 1;
-      }
-      if (column < 8 && row > 1) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column + 2 + 64) + (row - 1)
-        ] = 1;
-      }
-      if (column < 7 && row > 2) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column + 1 + 64) + (row - 2)
-        ] = 1;
-      }
-      if (column < 7 && row < 8) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column + 1 + 64) + (row + 2)
-        ] = 1;
-      }
-      if (column < 8 && row < 7) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column + 2 + 64) + (row + 1)
-        ] = 1;
-      }
-      if (column > 1 && row < 7) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column - 1 + 64) + (row + 2)
-        ] = 1;
-      }
-      if (column > 2 && row < 8) {
-        nodes[nodeName].edges[
-          String.fromCharCode(column - 2 + 64) + (row + 1)
-        ] = 1;
+  return null;
+}
+
+export function createChessboard(): Graph {
+  const numRows = 8;
+  const numCols = 8;
+
+  const graph: Graph = [];
+  for (let row = 0; row < numRows; row++) {
+    graph[row] = [];
+    for (let col = 0; col < numCols; col++) {
+      graph[row][col] = [];
+
+      const neighbors: Array<[number, number]> = [
+        [row - 1, col - 1], [row - 1, col], [row - 1, col + 1],
+        [row, col - 1],                     [row, col + 1],
+        [row + 1, col - 1], [row + 1, col], [row + 1, col + 1],
+      ];
+
+      for (const [r, c] of neighbors) {
+        if (r >= 0 && r < numRows && c >= 0 && c < numCols) {
+          graph[row][col].push({ to: { row: r, col: c }, weight: 1 });
+        }
       }
     }
   }
 
-  return nodes;
+  return graph;
 }
 
-function getNodePosition(nodeName: string, nodes: Nodes): Point {
-  const column = nodeName.charCodeAt(0) - 64;
-  const row = parseInt(nodeName.charAt(1), 10);
-  return { x: column, y: row };
+
+const chessboardGraph = createChessboard();
+
+export function findRoute(start:string, end:string, end1:string){
+  const {distance:distance1, path: path1} = dijkstra(chessboardGraph, convertPosition(start)!, convertPosition(end)!);
+
+  const {distance:distance2, path: path2} = dijkstra(chessboardGraph, convertPosition(end)!, convertPosition(end1)!);
+
+    // total path
+    const totalpath = [...path1, ...path2];
+
+    // calculate total time
+
+    const res = totalpath.map((el) => revertPosition(el))
+
+    if(res == null){
+      return []
+    }
+
+    return res;
 }
 
-function manhattanDistance(point1: Point, point2: Point): number {
-  return Math.abs(point1.x - point2.x) + Math.abs(point1.y - point2.y);
-}
+function dijkstra(graph: Graph, start: Vertex, end: Vertex): { distance: number, path: Array<Vertex> } {
+  const numRows = graph.length;
+  const numCols = graph[0].length;
 
-function neighborDistance(node1: NodeRoute, node2: NodeRoute): number {
-  return node1.position.x === node2.position.x ||
-    node1.position.y === node2.position.y
-    ? 1
-    : 1.5;
-}
+  const dist: Array<Array<number>> = Array(numRows)
+    .fill(null)
+    .map(() => Array(numCols).fill(Number.MAX_VALUE));
+  const visited: Array<Array<boolean>> = Array(numRows)
+    .fill(null)
+    .map(() => Array(numCols).fill(false));
+  const previous: Array<Array<Vertex | null>> = Array(numRows)
+    .fill(null)
+    .map(() => Array(numCols).fill(null));
 
-function getNeighbors(node: NodeRoute, nodes: Nodes): NodeRoute[] {
-  const neighbors: NodeRoute[] = [];
+  dist[start.row][start.col] = 0;
 
-  for (const [nodeName, distance] of Object.entries(
-    nodes[nodeToNodeName(node.position)]?.edges ?? {}
-  )) {
-    const neighbor = {
-      position: getNodePosition(nodeName, nodes),
-      gScore: Infinity,
-      fScore: Infinity,
-    };
+  while (true) {
+    let minDist = Number.MAX_VALUE;
+    let minVertex: Vertex | null = null;
 
-    neighbors.push(neighbor);
-  }
+    for (let row = 0; row < numRows; row++) {
+      for (let col = 0; col < numCols; col++) {
+        if (!visited[row][col] && dist[row][col] < minDist) {
+          minDist = dist[row][col];
+          minVertex = { row, col };
+        }
+      }
+    }
 
-  return neighbors;
-}
+    if (minVertex === null) {
+      break;
+    }
 
-function getLowestFScoreNode(nodes: NodeRoute[]): NodeRoute {
-  let lowestFNode = nodes[0];
+    const { row, col } = minVertex;
+    visited[row][col] = true;
 
-  for (const node of nodes) {
-    if (node.fScore < lowestFNode.fScore) {
-      lowestFNode = node;
+    if (row === end.row && col === end.col) {
+      // Reconstruct the path
+      const path: Array<Vertex> = [];
+      let current: Vertex | null = end;
+      while (current !== null) {
+        path.unshift(current);
+        current = previous[current.row][current.col];
+      }
+      return { distance: dist[end.row][end.col], path };
+    }
+
+    for (const { to, weight } of graph[row][col]) {
+      const { row: nextRow, col: nextCol } = to;
+      const newDist = dist[row][col] + weight;
+
+      if (newDist < dist[nextRow][nextCol]) {
+        dist[nextRow][nextCol] = newDist;
+        previous[nextRow][nextCol] = { row, col };
+      }
     }
   }
 
-  return lowestFNode;
-}
-
-function reconstructPath(current: NodeRoute): string[] {
-  const path = [nodeToNodeName(current.position)];
-
-  while (current.cameFrom) {
-    current = current.cameFrom;
-    path.push(nodeToNodeName(current.position));
-  }
-
-  return path.reverse();
-}
-
-function nodeToNodeName(position: Point): string {
-  const column = String.fromCharCode(position.x + 64);
-  const row = position.y;
-  return column + row;
+  return { distance: -1, path: [] }; // If no path exists
 }
 
 
-function isValidNode(nodeName: string): boolean {
-    const columnCode = nodeName.charCodeAt(0);
-    const row = parseInt(nodeName.charAt(1), 10);
-    return (
-      nodeName.length === 2 &&
-      columnCode >= 65 &&
-      columnCode <= 72 &&
-      row >= 1 &&
-      row <= 8
-    );
-  }

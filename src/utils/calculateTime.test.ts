@@ -3,13 +3,13 @@ import * as ToBeTested from "./calculateTime";
 
 describe("Calculate time algorihtm", () =>{
     test("Calculate the time from a calculateStep", async() =>{
-        const test = await ToBeTested.calculateStep("A1","B1");
+        const test = await ToBeTested.calculateStep("A1","B1",[]);
         console.log(test)
         expect(test).toBe(10.46);
     });
 
     test("Calculate the time from a calculateStep (undefined)", async() =>{
-        const test2 = await ToBeTested.calculateStep("A1","B2");
+        const test2 = await ToBeTested.calculateStep("A1","B2", []);
         console.log(test2)
         expect(test2).toBeUndefined();
     });

@@ -1,3 +1,4 @@
+import { calculateTime } from "@/utils/calculateTime";
 import { findRoute } from "@/utils/findRoute";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
@@ -32,6 +33,10 @@ export default async function handler(req: any, res: any) {
     console.log("Req", req.body)
 
     const route = findRoute(startingPoint, pickupPoint, deliveryPoint);
+    console.log({route})
+    const time = await calculateTime(route as string[]);
+
+    console.log("Tempo total é de: ", time);
 
     const text = (Math.random() * 100).toString();
     const unixTimestamp = Math.floor(new Date().getTime() / 1000);
