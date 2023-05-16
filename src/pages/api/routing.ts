@@ -17,6 +17,7 @@ export default async function handler(req: any, res: any) {
 
     const params = {
       TableName: Table.routes.tableName,
+      
       ScanIndexForward: false,
       Limit: 10,
     };
@@ -32,9 +33,9 @@ export default async function handler(req: any, res: any) {
     const {startingPoint, pickupPoint, deliveryPoint} = req.body;
     console.log("Req", req.body)
 
-    const route = findRoute(startingPoint, pickupPoint, deliveryPoint);
+    const route = await findRoute(startingPoint, pickupPoint, deliveryPoint);
     console.log({route})
-    const time = await calculateTime(route as string[]);
+    const time = await calculateTime(route as any);
 
     console.log("Tempo total é de: ", time);
 

@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-export async function calculateTime(path: string[]){
+export async function calculateTime(path: string[] | null){
+
+    if(!path){
+        return null;
+    }
 
     const {data} = await axios.get("https://mocki.io/v1/10404696-fd43-4481-a7ed-f9369073252f")
 

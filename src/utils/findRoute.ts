@@ -1,3 +1,5 @@
+import { calculateTime } from "./calculateTime";
+
 type Vertex = { row: number; col: number };
 type Edge = { to: Vertex; weight: number };
 
@@ -40,10 +42,14 @@ export function createChessboard(): Graph {
     for (let col = 0; col < numCols; col++) {
       graph[row][col] = [];
 
-      const neighbors: Array<[number, number]> = [
+      /*const neighbors: Array<[number, number]> = [
         [row - 1, col - 1], [row - 1, col], [row - 1, col + 1],
         [row, col - 1],                     [row, col + 1],
         [row + 1, col - 1], [row + 1, col], [row + 1, col + 1],
+      ];*/
+
+      const neighbors: Array<[number, number]> = [
+        [row - 1, col], [row, col - 1], [row, col + 1], [row + 1, col]
       ];
 
       for (const [r, c] of neighbors) {
@@ -60,21 +66,23 @@ export function createChessboard(): Graph {
 
 const chessboardGraph = createChessboard();
 
-export function findRoute(start:string, end:string, end1:string){
+export async function findRoute(start:string, end:string, end1:string){
   const {distance:distance1, path: path1} = dijkstra(chessboardGraph, convertPosition(start)!, convertPosition(end)!);
 
   const {distance:distance2, path: path2} = dijkstra(chessboardGraph, convertPosition(end)!, convertPosition(end1)!);
 
+  path1.pop();
     // total path
     const totalpath = [...path1, ...path2];
 
     // calculate total time
-
     const res = totalpath.map((el) => revertPosition(el))
 
     if(res == null){
       return []
     }
+
+    const totalTime = await calculateTime(res as any);
 
     return res;
 }

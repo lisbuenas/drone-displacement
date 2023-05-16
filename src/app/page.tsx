@@ -1,31 +1,12 @@
 "use client"
 
-import axios from 'axios';
-import { useEffect, useState } from 'react';
 import Chessboard from './components/ChessBoard';
+import Toast from './components/Toast';
+import useGetHome from './hooks/useGetHome';
 
 export default function Home() {
 
-  const [lastRoutes, setLastRoutes] = useState<any>([]);
-
-  const [startingPoint, setStartingPoint] = useState("");
-  const [pickupPoint, setPickupPoint] = useState("");
-  const [deliveryPoint, setDeliveryPoint] = useState("");
-
-  const calculateRoute = async (startingPoint:string, pickupPoint:string, deliveryPoint:string) =>{
-    const {data} = await axios.post("/api/routing",{startingPoint, pickupPoint, deliveryPoint});
-    console.log({data})
-  }
-
-  const getRoutes = async() =>{
-    const {data} = await axios.get("/api/routing");
-    console.log({data});
-    setLastRoutes(data?.routes ??[]);
-  }
-
-  useEffect(()=>{
-    getRoutes();
-  },[])
+  const {getRoutes,toastShow,toastMessage,lastRoutes, setLastRoutes,startingPoint, setStartingPoint,pickupPoint, setPickupPoint,deliveryPoint, setDeliveryPoint,calculateRoute} = useGetHome()
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -38,7 +19,9 @@ export default function Home() {
           <code className="font-mono font-bold">Start your route now</code>
         </div>
         <div className="flex flex-col items-center justify-center h-screen">
-      
+
+        <Toast message={toastMessage} toastShow={toastShow} />
+
       <h1 className="text-3xl font-bold mb-6">Drone Delivery Route</h1>
       <div className="flex flex-col items-center justify-center space-y-4">
         <label htmlFor="start-input" className="text-xl">
@@ -85,6 +68,10 @@ export default function Home() {
           Calculate Fastest Route
         </button>
         <div className="text-white">
+
+          <h2>Current Delivery</h2>
+
+
           <h2>Last Deliveries</h2>
             {lastRoutes && lastRoutes?.map((el:any, index:number) =><div className='text-white' key={index}>Rota {el.routes} {new Date(el.createdAt).toLocaleTimeString("pt-BR")}</div>)}
           </div>
