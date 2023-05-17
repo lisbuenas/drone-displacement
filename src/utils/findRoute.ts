@@ -1,8 +1,5 @@
-import { calculateTime } from "./calculateTime";
-
 type Vertex = { row: number; col: number };
 type Edge = { to: Vertex; weight: number };
-
 
 type Graph = Array<Array<Array<Edge>>>;
 
@@ -23,7 +20,12 @@ function convertPosition(position: string): Vertex | null {
 function revertPosition(position: Vertex): string | null {
   const columnLabels = "ABCDEFGH";
 
-  if (position.row >= 0 && position.row < 8 && position.col >= 0 && position.col < 8) {
+  if (
+    position.row >= 0 &&
+    position.row < 8 &&
+    position.col >= 0 &&
+    position.col < 8
+  ) {
     const columnChar = columnLabels[position.col];
     const rowChar = (position.row + 1).toString();
     return `${columnChar}${rowChar}`;
@@ -41,15 +43,11 @@ export function createChessboard(): Graph {
     graph[row] = [];
     for (let col = 0; col < numCols; col++) {
       graph[row][col] = [];
-
-      /*const neighbors: Array<[number, number]> = [
-        [row - 1, col - 1], [row - 1, col], [row - 1, col + 1],
-        [row, col - 1],                     [row, col + 1],
-        [row + 1, col - 1], [row + 1, col], [row + 1, col + 1],
-      ];*/
-
       const neighbors: Array<[number, number]> = [
-        [row - 1, col], [row, col - 1], [row, col + 1], [row + 1, col]
+        [row - 1, col],
+        [row, col - 1],
+        [row, col + 1],
+        [row + 1, col],
       ];
 
       for (const [r, c] of neighbors) {
@@ -63,31 +61,39 @@ export function createChessboard(): Graph {
   return graph;
 }
 
-
 const chessboardGraph = createChessboard();
 
-export async function findRoute(start:string, end:string, end1:string){
-  const {distance:distance1, path: path1} = dijkstra(chessboardGraph, convertPosition(start)!, convertPosition(end)!);
+export async function findRoute(start: string, end: string, end1: string) {
+  const { path: path1 } = dijkstra(
+    chessboardGraph,
+    convertPosition(start)!,
+    convertPosition(end)!
+  );
 
-  const {distance:distance2, path: path2} = dijkstra(chessboardGraph, convertPosition(end)!, convertPosition(end1)!);
+  const { path: path2 } = dijkstra(
+    chessboardGraph,
+    convertPosition(end)!,
+    convertPosition(end1)!
+  );
 
   path1.pop();
-    // total path
-    const totalpath = [...path1, ...path2];
+  // total path
+  const totalpath = [...path1, ...path2];
 
-    // calculate total time
-    const res = totalpath.map((el) => revertPosition(el))
+  const res = totalpath.map((el) => revertPosition(el));
 
-    if(res == null){
-      return []
-    }
+  if (res == null) {
+    return [];
+  }
 
-    const totalTime = await calculateTime(res as any);
-
-    return res;
+  return res;
 }
 
-function dijkstra(graph: Graph, start: Vertex, end: Vertex): { distance: number, path: Array<Vertex> } {
+function dijkstra(
+  graph: Graph,
+  start: Vertex,
+  end: Vertex
+): { distance: number; path: Array<Vertex> } {
   const numRows = graph.length;
   const numCols = graph[0].length;
 
@@ -147,5 +153,3 @@ function dijkstra(graph: Graph, start: Vertex, end: Vertex): { distance: number,
 
   return { distance: -1, path: [] }; // If no path exists
 }
-
-

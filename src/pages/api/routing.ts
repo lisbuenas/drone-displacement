@@ -1,3 +1,4 @@
+import { Route } from "@/app/types";
 import { calculateTime } from "@/utils/calculateTime";
 import { findRoute } from "@/utils/findRoute";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -41,10 +42,11 @@ export default async function handler(req: any, res: any) {
 
     const text = (Math.random() * 100).toString();
     const unixTimestamp = Math.floor(new Date().getTime() / 1000);
-    const payload = {
+    const payload:Route = {
       id: nanoid(),
-      routes: JSON.stringify(route),
+      route: JSON.stringify(route),
       createdAt: unixTimestamp,
+      totalTime:(time ?? -1)
     };
 
     await db.send(

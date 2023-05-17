@@ -17,6 +17,7 @@ export default {
           id: "string",
           createdAt: "number",
           route: "string",
+          totalTime:"number"
         },
         primaryIndex: { partitionKey: "id", sortKey: "createdAt" },
       });

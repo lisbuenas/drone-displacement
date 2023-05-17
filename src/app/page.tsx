@@ -1,83 +1,114 @@
-"use client"
+"use client";
 
-import Chessboard from './components/ChessBoard';
-import Toast from './components/Toast';
-import useGetHome from './hooks/useGetHome';
+import Chessboard from "./components/ChessBoard";
+import Toast from "./components/Toast";
+import useGetHome from "./hooks/useGetHome";
+import Image from "next/image";
 
 export default function Home() {
-
-  const {getRoutes,toastShow,toastMessage,lastRoutes, setLastRoutes,startingPoint, setStartingPoint,pickupPoint, setPickupPoint,deliveryPoint, setDeliveryPoint,calculateRoute} = useGetHome()
+  const {
+    loading,
+    resultRoute,
+    statusError,
+    getRoutes,
+    toastShow,
+    toastMessage,
+    lastRoutes,
+    setLastRoutes,
+    startingPoint,
+    setStartingPoint,
+    pickupPoint,
+    setPickupPoint,
+    deliveryPoint,
+    setDeliveryPoint,
+    calculateRoute,
+  } = useGetHome();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <div className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          The Drone routing tool TEST
-          <Chessboard/>
-          
-          <code className="font-mono font-bold">Start your route now</code>
-        </div>
-        <div className="flex flex-col items-center justify-center h-screen">
-
-        <Toast message={toastMessage} toastShow={toastShow} />
-
-      <h1 className="text-3xl font-bold mb-6">Drone Delivery Route</h1>
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <label htmlFor="start-input" className="text-xl">
-          Start Input:
-        </label>
-        <input
-          type="text"
-          id="start-input"
-          name="start-input"
-          value={startingPoint}
-          onChange={(e:any)=> setStartingPoint(e.target.value)}
-          className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-96 focus:outline-none focus:border-blue-400"
+    <div className="grid grid-cols-12 md:grid-cols-12 gap-4">
+      <div className="col-span-12 md:col-span-8">
+        <Image
+          width={200}
+          height={200}
+          className="mx-auto pt-4"
+          alt="Amazonia"
+          src="/logo.jpg"
         />
-        <label htmlFor="pickup-input" className="text-xl">
-          Object Pickup Input:
-        </label>
-        <input
-          type="text"
-          id="pickup-input"
-          name="pickup-input"
-          value={pickupPoint}
-          onChange={(e:any)=> setPickupPoint(e.target.value)}
-          className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-96 focus:outline-none focus:border-blue-400"
+        <Chessboard onClick={(data) => console.log(data)} />
+      </div>
+      <div className="col-span-12 md:col-span-4">
+        <Toast
+          message={toastMessage}
+          toastShow={toastShow}
+          statusError={statusError}
         />
-        <label htmlFor="delivery-input" className="text-xl">
-          Delivery Object Input:
-        </label>
-        <input
-          type="text"
-          id="delivery-input"
-          name="delivery-input"
-          value={deliveryPoint}
-          onChange={(e:any) => setDeliveryPoint(e.target.value)}
-          className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-96 focus:outline-none focus:border-blue-400"
-        />
-        <button
-          onClick={async () => {
+        <h1 className="text-3xl font-bold mb-6 text-center pt-4">
+          Drone Delivery Route
+        </h1>
+        <div className="flex flex-col items-center space-y-4">
+          <label htmlFor="start-input" className="text-xl">
+            Start Input
+          </label>
+          <input
+            type="text"
+            id="start-input"
+            name="start-input"
+            value={startingPoint}
+            onChange={(e: any) => setStartingPoint(e.target.value)}
+            className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-full md:w-96 focus:outline-none focus:border-blue-400"
+          />
+          <label htmlFor="pickup-input" className="text-xl">
+            Object Pickup Input
+          </label>
+          <input
+            type="text"
+            id="pickup-input"
+            name="pickup-input"
+            value={pickupPoint}
+            onChange={(e: any) => setPickupPoint(e.target.value)}
+            className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-full md:w-96 focus:outline-none focus:border-blue-400"
+          />
+          <label htmlFor="delivery-input" className="text-xl">
+            Delivery Object Input
+          </label>
+          <input
+            type="text"
+            id="delivery-input"
+            name="delivery-input"
+            value={deliveryPoint}
+            onChange={(e: any) => setDeliveryPoint(e.target.value)}
+            className="rounded-lg border-gray-400 text-black border-2 py-2 px-4 w-full md:w-96 focus:outline-none focus:border-blue-400"
+          />
+          {!loading ? (
+            <button
+              onClick={async () => {
+                await calculateRoute(startingPoint, pickupPoint, deliveryPoint);
+                getRoutes();
+              }}
+              className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600 w-full md:w-auto"
+            >
+              Calculate Fastest Route
+            </button>
+          ) : (
+            <div className="flex items-center justify-center">
+              <div className="w-12 h-12 border-t-4 border-blue-500 rounded-full animate-spin"></div>
+            </div>
+          )}
 
-            await calculateRoute(startingPoint, pickupPoint, deliveryPoint);
-            getRoutes()
-          }}
-          className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
-        >
-          Calculate Fastest Route
-        </button>
-        <div className="text-white">
-
-          <h2>Current Delivery</h2>
-
-
-          <h2>Last Deliveries</h2>
-            {lastRoutes && lastRoutes?.map((el:any, index:number) =><div className='text-white' key={index}>Rota {el.routes} {new Date(el.createdAt).toLocaleTimeString("pt-BR")}</div>)}
+          <div className="text-white">
+            <h2>Current Delivery</h2>
+            {(resultRoute as any)?.routes?.routes}
+            <h2>Last Deliveries</h2>
+            {lastRoutes &&
+              lastRoutes.map((el: any, index: number) => (
+                <div className="text-white" key={index}>
+                  Rota {el.routes}{" "}
+                  {new Date(el.createdAt).toLocaleTimeString("pt-BR")}
+                </div>
+              ))}
           </div>
+        </div>
       </div>
     </div>
-      </div>
-    </main>
-  )
+  );
 }

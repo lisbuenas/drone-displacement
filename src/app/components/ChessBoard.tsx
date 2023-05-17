@@ -1,6 +1,11 @@
 import React from "react";
 
-const Chessboard = () => {
+// TODO: trigger click events
+export interface ChessBoardProps{
+  onClick:(data:string) => void
+}
+
+const Chessboard = ({onClick}) => {
   const columns = ["A", "B", "C", "D", "E", "F", "G", "H"];
   const rows = ["8", "7", "6", "5", "4", "3", "2", "1"];
   const squares:any = [];
@@ -16,7 +21,7 @@ const Chessboard = () => {
             isDark ? "bg-gray-600" : "bg-gray-300"
           }`}
         >
-          <span className={`${isDark ? "text-white" : "text-black"}`}>
+          <span className={`${isDark ? "text-white" : "text-black"}`} onClick={() => onClick(squareName)}>
             {squareName}
           </span>
         </div>
@@ -25,7 +30,7 @@ const Chessboard = () => {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col items-center">
       <div className="flex">
         <div className="w-12 h-12" />
         {columns.map((column) => (
