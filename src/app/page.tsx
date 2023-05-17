@@ -4,6 +4,7 @@ import Chessboard from "./components/ChessBoard";
 import Toast from "./components/Toast";
 import useGetHome from "./hooks/useGetHome";
 import Image from "next/image";
+import { Route } from "./types";
 
 export default function Home() {
   const {
@@ -97,13 +98,13 @@ export default function Home() {
 
           <div className="text-white">
             <h2>Current Delivery</h2>
-            {(resultRoute as any)?.routes?.routes}
+            {resultRoute.route} {" "} { resultRoute.totalTime + " "}seconds
             <h2>Last Deliveries</h2>
             {lastRoutes &&
-              lastRoutes.map((el: any, index: number) => (
+              lastRoutes.map((el: Route, index: number) => (
                 <div className="text-white" key={index}>
-                  Rota {el.routes}{" "}
-                  {new Date(el.createdAt).toLocaleTimeString("pt-BR")}
+                  Route {el.route}{" "}
+                  {el.totalTime + " "} seconds
                 </div>
               ))}
           </div>

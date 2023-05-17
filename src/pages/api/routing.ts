@@ -56,7 +56,7 @@ export default async function handler(req: any, res: any) {
       })
     );
 
-    res.status(200).json({ routes: payload });
+    res.status(200).json({ route: JSON.stringify(route), totalTime:time });
     return;
   }
 }

@@ -1,6 +1,8 @@
 The project uses the sst framework, to allow fast pace development and deployment on serverless tools
 ## Getting Started
 
+You'll need the AWS credentials configured on machine
+
 First, run the development server:
 
 
@@ -20,8 +22,13 @@ It'll create the cloud resources to run the project
 yarn dev
 
 ```
+To deploy the project
 
+```bash
 yarn sst deploy --stage prod
+```
+
+And the URL of cloudfront will be returned to access the project
 
 ## About the project
 
@@ -32,3 +39,5 @@ Created some Unit tests to cover the time calculation functions between the path
 Used tailwind css with the basic setup of the nextjs project to cover the basic responsiveness and interface
 
 Used the hook pattern to split UI from business logic
+
+Missing some validations to improve the usage experience

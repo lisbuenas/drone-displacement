@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Route } from "../types";
 
 const useGetHome = () => {
   const [loading, setLoading] = useState(false);
-  const [resultRoute, setResultRoute] = useState("");
+  const [resultRoute, setResultRoute] = useState<Route>({} as Route);
   const [lastRoutes, setLastRoutes] = useState<any>([]);
   const [startingPoint, setStartingPoint] = useState("");
   const [pickupPoint, setPickupPoint] = useState("");
